@@ -1,53 +1,155 @@
 import "./App.css";
+import { useState } from "react";
 
 export default function Example() {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      // TODO: Replace with your actual CRM API endpoint
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        setEmail("");
+      } else {
+        throw new Error('Failed to subscribe');
+      }
+    } catch {
+      // For now, simulate success since we don't have a backend
+      console.log('Email submitted:', email);
+      setIsSubmitted(true);
+      setEmail("");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (error) setError("");
+  };
+
   return (
     <>
-      <div className="flex min-h-screen flex-col justify-center items-center px-6 py-12 lg:px-8 bg-brand-cream">
-        <div className="flex flex-col items-center justify-center p-10 rounded-lg">
-
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+      <div className="flex min-h-screen">
+        {/* Left half - Logo with diamond pattern background */}
+        <div className="flex-1 flex items-center justify-center bg-brand-cream relative">
+          <div 
+            className="absolute inset-0 opacity-40"
+            style={{
+              backgroundImage: `
+                linear-gradient(45deg, rgba(183, 157, 107, 0.15) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(183, 157, 107, 0.15) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(183, 157, 107, 0.15) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(183, 157, 107, 0.15) 75%),
+                linear-gradient(#DCD6C5 2px, transparent 2px),
+                linear-gradient(90deg, #DCD6C5 2px, transparent 2px)
+              `,
+              backgroundSize: '40px 40px, 40px 40px, 40px 40px, 40px 40px, 40px 40px, 40px 40px'
+            }}
+          ></div>
           <img
             alt="Your Company"
             src="src/assets/logo_new.svg"
-            className="mx-auto w-60 h-60 sm:w-48 sm:h-48 lg:w-64 lg:h-64"
+            className="w-150 h-150 relative z-10"
           />
-          <h2 className="text-center text-2xl/9 font-bold tracking-tight text-brand-charcoal font-heading">
-            Coming Soon
-          </h2>
         </div>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm/6 font-medium text-brand-charcoal font-body"
-              >
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-brand-charcoal outline-1 -outline-offset-1 outline-brand-taupe placeholder:text-brand-charcoal/60 focus:outline-2 focus:-outline-offset-2 focus:outline-brand-green sm:text-sm/6 font-body"
-                />
+        {/* Right half - Form with green gradient background */}
+        <div 
+          className="flex-1 flex items-center justify-center px-6 py-12 lg:px-8"
+          style={{ 
+            background: 'linear-gradient(135deg, #1A4D2E 0%, #2D5A3F 50%, #1A4D2E 100%)'
+          }}
+        >
+          <div className="w-full max-w-sm">
+            <h2 className="text-center text-5xl font-bold tracking-tight text-white font-heading mb-8">
+              Coming Soon
+            </h2>
+            
+            {isSubmitted ? (
+              <div className="text-center">
+                <div className="text-white text-2xl font-heading mb-4">
+                  Thank You!
+                </div>
+                <p className="text-white/80 font-body mb-6">
+                  We'll notify you when we launch.
+                </p>
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="text-brand-gold hover:text-white transition-colors font-body"
+                >
+                  Subscribe another email
+                </button>
               </div>
-            </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-white font-body"
+                  >
+                    Email address
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={email}
+                      onChange={handleEmailChange}
+                      required
+                      autoComplete="email"
+                      disabled={isSubmitting}
+                      className="block w-full rounded-md bg-white px-3 py-2 text-base text-brand-charcoal outline-1 -outline-offset-1 outline-brand-taupe placeholder:text-brand-charcoal/60 focus:outline-2 focus:-outline-offset-2 focus:outline-white sm:text-sm font-body disabled:opacity-50"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  {error && (
+                    <p className="mt-2 text-sm text-red-300 font-body">
+                      {error}
+                    </p>
+                  )}
+                </div>
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-brand-green px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-brand-gold/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold font-body"
-              >
-                Stay Updated
-              </button>
-            </div>
-          </form>
-        </div>
+                <div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    style={{ 
+                      background: 'linear-gradient(135deg, #B79D6B 0%, #C8A97A 50%, #B79D6B 100%)',
+                      boxShadow: '0 4px 15px rgba(183, 157, 107, 0.3)'
+                    }}
+                    className="flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-xs hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold font-body transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Subscribing...' : 'Stay Updated'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </>
