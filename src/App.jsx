@@ -72,7 +72,7 @@ export default function Example() {
           ></div>
           <img
             alt="Your Company"
-            src="src/assets/logo_new.svg"
+            src="/logo_new.svg"
             className="w-100 h-100 sm:w-100 sm:h-100 lg:w-150 lg:h-150 relative z-10"
           />
         </div>
